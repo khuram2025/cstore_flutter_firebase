@@ -24,7 +24,7 @@ class CustomerTab extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => CustomerDetailPage(name: 'Sunaina Pai')),
+                    MaterialPageRoute(builder: (context) => CustomerDetailPage(name: 'Sunaina Pai', balanceDue: '500',)),
                   );
                 },
               ),

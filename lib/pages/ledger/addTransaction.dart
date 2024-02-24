@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AddTransactionScreen extends StatefulWidget {
-  final bool isGiven; // Flag to determine if the transaction is "Given" or "Received"
+  final bool isGiven; // Add this member variable
 
-  const AddTransactionScreen({Key? key, required this.isGiven}) : super(key: key);
+  const AddTransactionScreen({Key? key, required this.isGiven}) : super(key: key); // Update constructor
 
   @override
   _AddTransactionScreenState createState() => _AddTransactionScreenState();
@@ -12,97 +12,116 @@ class AddTransactionScreen extends StatefulWidget {
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final TextEditingController _amountController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
-  String? _note;
+  final TextEditingController _noteController = TextEditingController();
+  DateTime _selectedDate = DateTime.now().subtract(Duration(microseconds: DateTime.now().microsecond));
+  bool isGiven = false; // Add this variable
+
+  @override
+  void initState() {
+    super.initState();
+    isGiven = widget.isGiven; // Access the value passed from the previous screen
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Transaction'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.check),
+            onPressed: () {
+              // Save transaction logic
+            },
+          ),
+        ],
       ),
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: TextField(
-              controller: _amountController,
-              decoration: InputDecoration(
-                labelText: 'Amount',
-                prefixText: '₹ ',
-              ),
-              keyboardType: TextInputType.number,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              final DateTime? picked = await showDatePicker(
-                context: context,
-                initialDate: _selectedDate,
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2101),
-              );
-              if (picked != null && picked != _selectedDate) {
-                setState(() {
-                  _selectedDate = picked;
-                });
-              }
-            },
-            child: Text(
-              'Date: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}',
-              style: TextStyle(fontSize: 18),
-            ),
-          ),
-          TextField(
-            decoration: InputDecoration(
-              labelText: 'Add Note (optional)',
-              suffixIcon: Icon(Icons.note_add),
-            ),
-            onChanged: (value) {
-              _note = value;
-            },
-          ),
-          Spacer(),
-          _buildNumberPad(),
-          SizedBox(height: 20),
-          FloatingActionButton(
-            onPressed: () {
-              // Logic to handle transaction submission
-            },
-            child: Icon(Icons.check),
-          ),
+          _buildAmountSection(),
+          _buildDateAndAddBillsSection(),
+          _buildNoteSection(),
+
         ],
       ),
     );
   }
 
-  Widget _buildNumberPad() {
-    return Container(
-      padding: EdgeInsets.all(16),
-      // Optional: Adjust your layout according to the design
+  Widget _buildAmountSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [1, 2, 3].map((i) => _buildNumberPadButton(i.toString())).toList(),
+          Text(
+            '₹5',
+            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.red),
           ),
-          // Add more rows for each number
-          // Add last row for decimal, zero, and operations (if needed)
+          // Include additional widgets if needed, like an input field for amount
         ],
       ),
     );
   }
 
-  Widget _buildNumberPadButton(String value) {
-    return TextButton(
-      onPressed: () {
-        setState(() {
-          _amountController.text += value;
-        });
-      },
-      child: Text(value, style: TextStyle(fontSize: 24)),
+  Widget _buildDateAndAddBillsSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: [
+          DropdownButtonFormField<DateTime>(
+            value: _selectedDate,
+            decoration: InputDecoration(
+              labelText: 'Date',
+              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+              border: OutlineInputBorder(),
+            ),
+            onChanged: (DateTime? newValue) {
+              setState(() {
+                if (newValue != null) {
+                  _selectedDate = newValue;
+                }
+              });
+            },
+            items: [DateTime.now()]
+                .map<DropdownMenuItem<DateTime>>((DateTime value) {
+              return DropdownMenuItem<DateTime>(
+                value: value,
+                child: Text(DateFormat('MMM dd, yyyy').format(value)),
+              );
+            }).toList(),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: () {
+              // Logic to add bills
+            },
+            icon: Icon(Icons.add, color: Colors.white),
+            label: Text('Add Bills'),
+            style: ElevatedButton.styleFrom(
+              primary: Colors.green,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30.0),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+            ),
+          ),
+        ],
+      ),
     );
   }
+
+  Widget _buildNoteSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: TextField(
+        controller: _noteController,
+        decoration: InputDecoration(
+          labelText: 'Add note (Optional)',
+          suffixIcon: Icon(Icons.note),
+        ),
+      ),
+    );
+  }
+
 }
