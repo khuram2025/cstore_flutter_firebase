@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:redesign_okcredit/screens/authetication/login.dart';
 
 import './app_imports.dart';
 import 'pages/ledger/customer/customerDetail.dart';
+import 'screens/authetication/sighun.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -42,6 +44,9 @@ class MyApp extends StatelessWidget {
           HelpPage.id: (context) => const HelpPage(),
           SharePage.id: (context) => const SharePage(),
           FindDefaulterPage.id: (context) => const FindDefaulterPage(),
+          LoginPage.id: (context) =>  LoginPage(), // Add the Login page route
+          SignupPage.id: (context) =>  SignupPage(), // Add the Signup page route
+
         },
       ),
     );

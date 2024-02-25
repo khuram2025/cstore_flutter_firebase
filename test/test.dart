@@ -1,130 +1,175 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class CustomerDetailPage extends StatelessWidget {
-  final String name;
-  final String balanceDue; // Define balanceDue as a member variable
+class AddTransactionScreen extends StatefulWidget {
+  final bool isGiven;
 
-  // Modify the constructor to accept balanceDue.
-  const CustomerDetailPage({
-    Key? key,
-    required this.name,
-    required this.balanceDue, // Add balanceDue as a required parameter
-  }) : super(key: key);
+  const AddTransactionScreen({Key? key, required this.isGiven}) : super(key: key);
+
+  @override
+  _AddTransactionScreenState createState() => _AddTransactionScreenState();
+}
+
+class _AddTransactionScreenState extends State<AddTransactionScreen> {
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
+  DateTime _selectedDate = DateTime.now();
+  String selectedUser = 'User 1';
+  List<String> users = ['User 1', 'User 2', 'User 3'];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = DateTime.now();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(name),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () {
-              // Action for edit
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.more_vert),
-            onPressed: () {
-              // Action for more options
-            },
-          ),
-        ],
+        title: Text('Add Transaction'),
       ),
-      body: Column(
-        children: [
-          // Your other widgets here...
-          _buildTransactionsHeader(context),
-          Expanded(
-            child: ListView.builder(
-              itemCount: 10, // Replace with your actual number of transactions
-              itemBuilder: (context, index) {
-                return _buildTransactionItem(
-                  context,
-                  // Replace with your actual transaction data
-                  date: DateTime.now(),
-                  description: 'Description of the transaction goes here...',
-                  amount: '₹100',
-                );
-              },
-            ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildUserDropdown(),
+              _buildAmountInput(),
+              _buildDateTimeInput(context),
+              _buildNoteInput(),
+              _buildInvoiceUploadRow(),
+              _buildSubmitButton(context),
+            ],
           ),
-        ],
+        ),
       ),
-      bottomSheet: _buildBottomSheet(),
     );
   }
 
-  Widget _buildTransactionsHeader(BuildContext context) {
+  Widget _buildUserDropdown() {
+    return DropdownButtonFormField<String>(
+      value: selectedUser,
+      decoration: InputDecoration(
+        labelText: 'User Name',
+        border: OutlineInputBorder(),
+      ),
+      onChanged: (String? newValue) {
+        setState(() {
+          selectedUser = newValue!;
+        });
+      },
+      items: users.map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildAmountInput() {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Transactions',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          Text(
-            'Filter',
-            style: TextStyle(color: Theme.of(context).primaryColor),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: TextField(
+        controller: _amountController,
+        decoration: InputDecoration(
+          labelText: 'Amount',
+          border: OutlineInputBorder(),
+        ),
+        keyboardType: TextInputType.number,
       ),
     );
   }
 
-  Widget _buildTransactionItem(BuildContext context, {required DateTime date, required String description, required String amount}) {
-    return Column(
-      children: [
-        ListTile(
-          title: Text(
-            DateFormat('dd/MM/yyyy').format(date),
-            style: TextStyle(fontWeight: FontWeight.bold),
+
+  Widget _buildDateTimeInput(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: GestureDetector(
+        onTap: () async {
+          final DateTime? pickedDate = await showDatePicker(
+            context: context,
+            initialDate: _selectedDate,
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2025),
+          );
+          if (pickedDate != null) {
+            final TimeOfDay? pickedTime = await showTimePicker(
+              context: context,
+              initialTime: TimeOfDay.fromDateTime(_selectedDate),
+            );
+            if (pickedTime != null) {
+              setState(() {
+                _selectedDate = DateTime(
+                  pickedDate.year,
+                  pickedDate.month,
+                  pickedDate.day,
+                  pickedTime.hour,
+                  pickedTime.minute,
+                );
+              });
+            }
+          }
+        },
+        child: AbsorbPointer(
+          child: TextField(
+            decoration: InputDecoration(
+              labelText: 'Date and Time',
+              hintText: DateFormat('yyyy-MM-dd – HH:mm').format(_selectedDate),
+              border: OutlineInputBorder(),
+            ),
           ),
-          subtitle: Text(
-            description.length > 10 ? '${description.substring(0, 10)}...' : description,
-          ),
-          trailing: Text(
-            amount,
-            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-          ),
-          isThreeLine: true,
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {
-                // Edit action
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                // Delete action
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.attach_file),
-              onPressed: () {
-                // Attachment action
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.visibility),
-              onPressed: () {
-                // View detail action
-              },
-            ),
-          ],
-        ),
-        Divider(),
-      ],
+      ),
     );
   }
 
-// Your _buildBottomSheet and other methods...
+  Widget _buildInvoiceUploadRow() {
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20.0),
+    child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+    Text(
+    'Upload Invoice',
+    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    ),
+      IconButton(
+        icon: Icon(Icons.camera_alt),
+        onPressed: () {
+          // Logic to take a photo for the invoice
+        },
+      ),
+      IconButton(
+        icon: Icon(Icons.image),
+        onPressed: () {
+          // Logic to select an invoice image from the gallery
+        },
+      ),
+    ],
+    ),
+    );
+  }
+
+  Widget _buildSubmitButton(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: ElevatedButton(
+        child: Text('Submit', style: TextStyle(color: Colors.white)),
+        onPressed: () {
+          // Submit logic
+        },
+        style: ElevatedButton.styleFrom(
+          primary: Colors.green, // Green background
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
+    );
+  }
 }
+

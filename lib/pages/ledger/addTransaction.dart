@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AddTransactionScreen extends StatefulWidget {
-  final bool isGiven; // Add this member variable
+  final bool isGiven;
 
-  const AddTransactionScreen({Key? key, required this.isGiven}) : super(key: key); // Update constructor
+  const AddTransactionScreen({Key? key, required this.isGiven}) : super(key: key);
 
   @override
   _AddTransactionScreenState createState() => _AddTransactionScreenState();
@@ -13,115 +13,163 @@ class AddTransactionScreen extends StatefulWidget {
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
-  DateTime _selectedDate = DateTime.now().subtract(Duration(microseconds: DateTime.now().microsecond));
-  bool isGiven = false; // Add this variable
+  DateTime _selectedDate = DateTime.now();
+  String selectedUser = 'User 1';
+  List<String> users = ['User 1', 'User 2', 'User 3'];
 
   @override
   void initState() {
     super.initState();
-    isGiven = widget.isGiven; // Access the value passed from the previous screen
+    _selectedDate = DateTime.now();
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Add Transaction'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.check),
-            onPressed: () {
-              // Save transaction logic
-            },
-          ),
-        ],
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildAmountSection(),
-          _buildDateAndAddBillsSection(),
-          _buildNoteSection(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildUserDropdown(),
+              _buildAmountInput(),
+              _buildDateTimeInput(context),
 
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAmountSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20.0),
-      child: Column(
-        children: [
-          Text(
-            '₹5',
-            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.red),
+              _buildInvoiceUploadRow(),
+              _buildSubmitButton(context),
+            ],
           ),
-          // Include additional widgets if needed, like an input field for amount
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDateAndAddBillsSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        children: [
-          DropdownButtonFormField<DateTime>(
-            value: _selectedDate,
-            decoration: InputDecoration(
-              labelText: 'Date',
-              contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
-              border: OutlineInputBorder(),
-            ),
-            onChanged: (DateTime? newValue) {
-              setState(() {
-                if (newValue != null) {
-                  _selectedDate = newValue;
-                }
-              });
-            },
-            items: [DateTime.now()]
-                .map<DropdownMenuItem<DateTime>>((DateTime value) {
-              return DropdownMenuItem<DateTime>(
-                value: value,
-                child: Text(DateFormat('MMM dd, yyyy').format(value)),
-              );
-            }).toList(),
-          ),
-          SizedBox(height: 20),
-          ElevatedButton.icon(
-            onPressed: () {
-              // Logic to add bills
-            },
-            icon: Icon(Icons.add, color: Colors.white),
-            label: Text('Add Bills'),
-            style: ElevatedButton.styleFrom(
-              primary: Colors.green,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNoteSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: TextField(
-        controller: _noteController,
-        decoration: InputDecoration(
-          labelText: 'Add note (Optional)',
-          suffixIcon: Icon(Icons.note),
         ),
       ),
     );
   }
 
+  Widget _buildUserDropdown() {
+    return DropdownButtonFormField<String>(
+      value: selectedUser,
+      decoration: InputDecoration(
+        labelText: 'User Name',
+        border: OutlineInputBorder(),
+      ),
+      onChanged: (String? newValue) {
+        setState(() {
+          selectedUser = newValue!;
+        });
+      },
+      items: users.map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildAmountInput() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: TextField(
+        controller: _amountController,
+        decoration: InputDecoration(
+          labelText: 'Amount',
+          border: OutlineInputBorder(),
+        ),
+        keyboardType: TextInputType.number,
+      ),
+    );
+  }
+
+
+  Widget _buildDateTimeInput(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: GestureDetector(
+        onTap: () async {
+          final DateTime? pickedDate = await showDatePicker(
+            context: context,
+            initialDate: _selectedDate,
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2025),
+          );
+          if (pickedDate != null) {
+            final TimeOfDay? pickedTime = await showTimePicker(
+              context: context,
+              initialTime: TimeOfDay.fromDateTime(_selectedDate),
+            );
+            if (pickedTime != null) {
+              setState(() {
+                _selectedDate = DateTime(
+                  pickedDate.year,
+                  pickedDate.month,
+                  pickedDate.day,
+                  pickedTime.hour,
+                  pickedTime.minute,
+                );
+              });
+            }
+          }
+        },
+        child: AbsorbPointer(
+          child: TextField(
+            decoration: InputDecoration(
+              labelText: 'Date and Time',
+              hintText: DateFormat('yyyy-MM-dd – HH:mm').format(_selectedDate),
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInvoiceUploadRow() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Upload Invoice',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          IconButton(
+            icon: Icon(Icons.camera_alt),
+            onPressed: () {
+              // Logic to take a photo for the invoice
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.image),
+            onPressed: () {
+              // Logic to select an invoice image from the gallery
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: ElevatedButton(
+        child: Text('Submit', style: TextStyle(color: Colors.white)),
+        onPressed: () {
+          // Submit logic
+        },
+        style: ElevatedButton.styleFrom(
+          primary: Colors.green, // Green background
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
+    );
+  }
 }
+

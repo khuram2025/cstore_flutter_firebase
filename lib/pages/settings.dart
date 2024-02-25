@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../constants.dart';
 import '../model/data.dart';
+import '../screens/authetication/login.dart';
+import '../screens/authetication/sighun.dart';
 import './settings/help.dart';
 import './settings/share.dart';
 import './settings/backup.dart';
@@ -191,6 +193,22 @@ class SettingsPage extends StatelessWidget {
                             ),
                             icon: Icons.share,
                             title: 'Share',
+                          ),
+                          SettingTile(
+                            onTap: () => Navigator.pushNamed(
+                              context,
+                              LoginPage.id, // Replace with the ID or route name of your login page
+                            ),
+                            icon: Icons.login,
+                            title: 'Login',
+                          ),
+                          SettingTile(
+                            onTap: () => Navigator.pushNamed(
+                              context,
+                              SignupPage.id, // Replace with the ID or route name of your signup page
+                            ),
+                            icon: Icons.app_registration,
+                            title: 'Signup',
                           ),
                         ],
                       ),
