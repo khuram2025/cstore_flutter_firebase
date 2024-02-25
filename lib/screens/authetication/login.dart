@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../ApiService.dart';
+import '../../bottom_navbar.dart';
+
 class LoginPage extends StatefulWidget {
   static const String id = 'login_page'; // Add this line
 
@@ -39,10 +42,22 @@ class _LoginPageState extends State<LoginPage> {
               _buildTextField(_mobileNumberController, 'Mobile Number', false, Icons.phone),
               _buildTextField(_passwordController, 'Password', true, Icons.lock),
               SizedBox(height: 20),
+              // ...
               ElevatedButton(
                 child: Text('Login', style: TextStyle(color: Colors.white)),
-                onPressed: () {
-                  // Login logic
+                onPressed: () async {
+                  String mobile = _mobileNumberController.text;
+                  String password = _passwordController.text;
+                  bool loginSuccess = await loginUser(mobile, password); // Call the login function
+                  if (loginSuccess) {
+                    // If login is successful, navigate to HomePage
+                    Navigator.of(context).pushReplacementNamed(BottomNavbar.id); // Replace with your HomePage route name
+                  } else {
+                    // Handle login failure (show error message)
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Login failed. Please check your credentials.'))
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   primary: Colors.green,
@@ -52,6 +67,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
+// ...
+
+
               SizedBox(height: 20),
               Center(
                 child: GestureDetector(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../ApiService.dart';
 import '../constants.dart';
 import '../model/data.dart';
 import '../screens/authetication/login.dart';
@@ -18,8 +20,39 @@ import './settings/find_defaulter.dart';
 
 import '../widgets/settings/setting_tile.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+
+  Map<String, dynamic>? userInfo;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserInfo();
+  }
+
+  void _loadUserInfo() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? authToken = prefs.getString('authToken');
+
+    if (authToken != null) {
+      var fetchedUserInfo = await fetchUserInfo(authToken);
+      if (fetchedUserInfo != null) {
+        setState(() {
+          userInfo = fetchedUserInfo;
+        });
+      }
+    } else {
+      print('Auth token not found');
+      // Handle the case when authToken is not available
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +69,7 @@ class SettingsPage extends StatelessWidget {
                     const SizedBox(height: 20.0),
                     GestureDetector(
                       onTap: () => Navigator.pushNamed(context, ProfilePage.id),
-                      child: const Row(
+                      child:  Row(
                         children: [
                           Hero(
                             tag: 'profile',
@@ -53,7 +86,7 @@ class SettingsPage extends StatelessWidget {
                               SizedBox(
                                 width: 180.0,
                                 child: Text(
-                                  'Nikhil Kamat',
+                                  userInfo != null ? 'User Name: ${userInfo!['name']}' : 'User Name',
                                   style: TextStyle(
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.bold,
@@ -61,6 +94,7 @@ class SettingsPage extends StatelessWidget {
                                   overflow: TextOverflow.clip,
                                   maxLines: 1,
                                 ),
+
                               ),
                               SizedBox(
                                 width: 150.0,

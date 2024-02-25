@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../ApiService.dart';
+
 class SignupPage extends StatefulWidget {
   static const String id = 'signup_page'; // Add this line
   @override
@@ -11,6 +13,23 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _businessNameController = TextEditingController();
+
+  void _submitSignup() {
+    String mobile = _mobileNumberController.text;
+    String password = _passwordController.text;
+    String confirmPassword = _confirmPasswordController.text;
+    String businessName = _businessNameController.text;
+
+    if (password != confirmPassword) {
+      // Show an error message that passwords don't match
+      print('Passwords do not match');
+      return;
+    }
+
+    // Call the signup function with an empty string for the name
+    signupUser(mobile, password, "", businessName);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +51,7 @@ class _SignupPageState extends State<SignupPage> {
               SizedBox(height: 20),
               ElevatedButton(
                 child: Text('Submit', style: TextStyle(color: Colors.white)),
-                onPressed: () {
-                  // Submit logic
-                },
+                onPressed: _submitSignup,  // Updated to use the _submitSignup method
                 style: ElevatedButton.styleFrom(
                   primary: Colors.green,
                   padding: EdgeInsets.symmetric(vertical: 15),
