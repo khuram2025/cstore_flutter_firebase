@@ -1,61 +1,63 @@
 import 'package:flutter/material.dart';
 
+import '../../ApiService.dart';
 import '../../widgets/ledger/transaction_tile.dart';
 import 'customer/customerDetail.dart';
 
-class CustomerTab extends StatelessWidget {
+class CustomerTab extends StatefulWidget {
   const CustomerTab({super.key});
 
   @override
+  _CustomerTabState createState() => _CustomerTabState();
+}
+
+class _CustomerTabState extends State<CustomerTab> {
+  List<dynamic> customers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCustomers().then((data) {
+      setState(() {
+        customers = data;
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.0),
         child: SingleChildScrollView(
           child: Column(
-            children: [
-              TransactionTile(
-                color: 0xff5099f5,
-                name: 'Sunaina Pai',
-                amount: '250',
-                remarks: 'DUE',
-                type: 'Payment',
-                date: '1 July, 2023',
+            children: customers.map((customer) {
+              // Assuming 'color' is an integer representation of a color in your customer data
+              int customerColor = customer['color'] ?? 0xff5099f5; // Default color if not provided
+
+              return TransactionTile(
+                color: customerColor,
+                name: customer['name'] ?? 'Unknown', // Provide a fallback for an empty or null name
+                amount: customer['amount'].toString(), // Convert to string if necessary
+                remarks: customer['remarks'] ?? 'No Remarks', // Provide a fallback for null remarks
+                type: customer['type'] ?? 'Payment', // Provide a fallback for null type
+                date: customer['date'] ?? 'Unknown Date', // Provide a fallback for null date
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => CustomerDetailPage(name: 'Sunaina Pai', balanceDue: '500',)),
+                    MaterialPageRoute(builder: (context) => CustomerDetailPage(
+                      name: customer['name'],
+                      balanceDue: customer['balanceDue'].toString(), // Convert to string if necessary
+                    )),
                   );
                 },
-              ),
-              TransactionTile(
-                color: 0xff9675ce,
-                name: 'Nitin Bargi',
-                amount: '1,300',
-                remarks: 'DUE',
-                type: 'Payment',
-                date: '17 Jun, 2023',
-              ),
-              TransactionTile(
-                color: 0xff4dbd91,
-                name: 'Aryan Shah',
-                amount: '2,850',
-                remarks: 'ADVANCE',
-                type: 'Payment',
-                date: '2 Jun, 2023',
-              ),
-              TransactionTile(
-                color: 0xff4cb6ac,
-                name: 'Dhruv Nanda',
-                amount: '800',
-                remarks: 'ADVANCE',
-                type: 'Payment',
-                date: '28 Mar, 2023',
-              ),
-            ],
+              );
+            }).toList(),
           ),
         ),
       ),
     );
   }
 }
+
+

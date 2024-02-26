@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
+import '../../ApiService.dart';
 import '../../constants.dart';
 import '../../model/data.dart';
 import '../../widgets/custom_divider.dart';
@@ -9,10 +13,27 @@ import '../../widgets/custom_text_button.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/add_contact/section_card.dart';
 
-class AddContactPage extends StatelessWidget {
+class AddContactPage extends StatefulWidget {
   const AddContactPage({super.key});
 
   static const id = '/addContactPage';
+
+  @override
+  _AddContactPageState createState() => _AddContactPageState();
+}
+
+class _AddContactPageState extends State<AddContactPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +81,7 @@ class AddContactPage extends StatelessWidget {
                                 value: 'Customer',
                                 contentPadding: const EdgeInsets.all(0),
                                 groupValue: value.selectedCustomerCategory,
-                                onChanged: (p0) =>
-                                    value.updateCustomerCategory(p0),
+                                onChanged: (String? newValue) => value.updateCustomerCategory(newValue!),
                               ),
                             ),
                             Expanded(
@@ -70,8 +90,7 @@ class AddContactPage extends StatelessWidget {
                                 title: const Text('Supplier'),
                                 value: 'Supplier',
                                 groupValue: value.selectedCustomerCategory,
-                                onChanged: (p0) =>
-                                    value.updateCustomerCategory(p0),
+                                onChanged: (String? newValue) => value.updateCustomerCategory(newValue!),
                               ),
                             ),
                           ],
@@ -85,14 +104,16 @@ class AddContactPage extends StatelessWidget {
                           style: kSectionHeaderStyle,
                         ),
                         const SizedBox(height: 15.0),
-                        const CustomTextField(
+                        CustomTextField(
+                          controller: _nameController,
                           hintText: 'User name',
                           prefixIcon: Icons.person,
                           label: 'Name*',
                           textInputType: TextInputType.name,
                           maxLength: 20,
                         ),
-                        const CustomTextField(
+                        CustomTextField(
+                          controller: _phoneController,
                           hintText: 'XXXXXXXXXX (Optional)',
                           prefixIcon: Icons.call,
                           label: 'Number',
@@ -102,10 +123,33 @@ class AddContactPage extends StatelessWidget {
                       ],
                     ),
                     CustomButton(
-                      onTap: () {},
+                      onTap: () async {
+                        int businessId = 1;
+                        String name = _nameController.text;
+                        String phone = _phoneController.text;
+
+                        bool success = await createOrLinkCustomer(name, phone, businessId);
+                        if (success) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Customer added successfully'))
+                          );
+
+                          // Navigate back to customer list route
+                          Navigator.pop(context); // Assuming your customer list is the previous page
+
+                          // Or, if you have a named route for the customer list:
+                          // Navigator.pushReplacementNamed(context, YourCustomerListRoute.id);
+
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to add customer'))
+                          );
+                        }
+                      },
                       margin: const EdgeInsets.fromLTRB(10, 0, 10, 10.0),
                       title: 'Confirm',
                     ),
+
                   ],
                 ),
               );

@@ -24,6 +24,7 @@ class TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String displayNameInitial = name.isNotEmpty ? name[0] : '#';
     return InkWell(  // Use InkWell for the onTap functionality
       onTap: onTap,
       child: Column(
@@ -40,7 +41,7 @@ class TransactionTile extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  name[0],
+                  displayNameInitial,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20.0,

@@ -133,3 +133,74 @@ Future<Map<String, dynamic>?> fetchUserInfo(String authToken) async {
   return null;
 }
 
+Future<List<dynamic>> fetchCustomers() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? authToken = prefs.getString('authToken');
+  var url = Uri.parse('http://farmapp.channab.com/customers/api/customers/'); // Replace with your API URL
+
+  Map<String, String> headers = {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Authorization': 'Token $authToken', // Replace 'Token' if you use a different scheme
+  };
+
+  print("Headers: $headers");  // Debug print
+
+  try {
+    var response = await http.get(url, headers: headers);
+
+    if (response.statusCode == 200) {
+      print('Customers fetched successfully');
+      return jsonDecode(response.body);
+    } else {
+      print('Failed to fetch customers: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error fetching customers: $e');
+  }
+
+  return []; // Return an empty list if the fetch operation fails
+}
+
+
+Future<bool> createOrLinkCustomer(String name, String phone, int businessId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? authToken = prefs.getString('authToken');
+  var url = Uri.parse('http://farmapp.channab.com/customers/api/customer-create-link/'); // Check if this URL is correct
+
+  Map<String, String> headers = {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Authorization': 'Token $authToken',
+  };
+
+  Map<String, dynamic> body = {
+    'name': name,
+    'phone': phone,
+    'business_id': businessId.toString(),
+  };
+
+  print('URL: $url'); // Print the URL
+  print('Headers: $headers'); // Print the headers
+  print('Body: $body'); // Print the body
+
+  try {
+    var response = await http.post(
+      url,
+      headers: headers,
+      body: jsonEncode(body),
+    );
+
+    print('Response Status: ${response.statusCode}'); // Print the response status
+    print('Response Body: ${response.body}'); // Print the response body
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print('Customer created/linked successfully');
+      return true;
+    } else {
+      print('Failed to create/link customer: ${response.statusCode}');
+      return false;
+    }
+  } catch (e) {
+    print('Error creating/linking customer: $e');
+    return false;
+  }
+}
