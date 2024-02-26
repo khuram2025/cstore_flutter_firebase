@@ -40,6 +40,38 @@ Future<bool> loginUser(String mobile, String password) async {
 }
 
 
+Future<bool> logoutUser() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  try {
+    // Check if the authToken exists
+    String? authToken = prefs.getString('authToken');
+    if (authToken != null) {
+      var url = Uri.parse('http://farmapp.channab.com/accounts/api/logout/'); // Replace with your API's logout URL
+
+      var response = await http.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Token $authToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Logout successful');
+        await prefs.remove('authToken'); // Remove the authToken from SharedPreferences
+        return true; // Logout successful
+      } else {
+        print('Failed to logout: ${response.statusCode}');
+      }
+    } else {
+      print('No authToken found');
+    }
+  } catch (e) {
+    print('Error making logout request: $e');
+  }
+  return false; // Logout failed
+}
 
 
 Future<void> signupUser(String mobile, String password, String name, String businessName) async {

@@ -30,6 +30,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
 
   Map<String, dynamic>? userInfo;
+  bool isLoggedIn = false;
 
   @override
   void initState() {
@@ -42,6 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
     String? authToken = prefs.getString('authToken');
 
     if (authToken != null) {
+      isLoggedIn = true; // User is logged in
       var fetchedUserInfo = await fetchUserInfo(authToken);
       if (fetchedUserInfo != null) {
         setState(() {
@@ -49,6 +51,7 @@ class _SettingsPageState extends State<SettingsPage> {
         });
       }
     } else {
+      isLoggedIn = false; // User is not logged in
       print('Auth token not found');
       // Handle the case when authToken is not available
     }
@@ -228,14 +231,30 @@ class _SettingsPageState extends State<SettingsPage> {
                             icon: Icons.share,
                             title: 'Share',
                           ),
-                          SettingTile(
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              LoginPage.id, // Replace with the ID or route name of your login page
+                          if (!isLoggedIn)
+                            SettingTile(
+                              onTap: () => Navigator.pushNamed(
+                                context,
+                                LoginPage.id, // Replace with the ID or route name of your login page
+                              ),
+                              icon: Icons.login,
+                              title: 'Login',
                             ),
-                            icon: Icons.login,
-                            title: 'Login',
-                          ),
+                          if (isLoggedIn)
+                            SettingTile(
+                              onTap: () async {
+                                bool result = await logoutUser();
+                                if (result) {
+                                  // Navigate to login screen or handle post-logout scenario
+                                  Navigator.pushReplacementNamed(context, LoginPage.id); // Replace with your login route
+                                } else {
+                                  // Handle logout failure scenario
+                                  // For instance, show an error message
+                                }
+                              },
+                              icon: Icons.logout,
+                              title: 'Logout',
+                            ),
                           SettingTile(
                             onTap: () => Navigator.pushNamed(
                               context,
