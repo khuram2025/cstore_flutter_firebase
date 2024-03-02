@@ -47,10 +47,12 @@ class _CustomerTabState extends State<CustomerTab> {
                     context,
                     MaterialPageRoute(builder: (context) => CustomerDetailPage(
                       name: customer['name'],
-                      balanceDue: customer['balanceDue'].toString(), // Convert to string if necessary
+                      balanceDue: customer['balanceDue'].toString(), // Assuming you still need to pass this
+                      mobileNumber: customer['phone'] ?? 'No Mobile Number', // Assuming 'mobileNumber' is the key
                     )),
                   );
                 },
+
               );
             }).toList(),
           ),

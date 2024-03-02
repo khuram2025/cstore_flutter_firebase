@@ -5,12 +5,14 @@ import 'package:redesign_okcredit/pages/ledger/addTransaction.dart';
 class CustomerDetailPage extends StatelessWidget {
   final String name;
   final String balanceDue; // Define balanceDue as a member variable
+  final String mobileNumber;
 
   // Modify the constructor to accept balanceDue.
   const CustomerDetailPage({
     Key? key,
     required this.name,
-    required this.balanceDue, // Add balanceDue as a required parameter
+    required this.balanceDue,
+    required this.mobileNumber,// Add balanceDue as a required parameter
   }) : super(key: key);
 
 
@@ -19,7 +21,7 @@ class CustomerDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(name),
+        title: Text('$name ($mobileNumber)'), // Display both name and mobile number
         actions: [
           IconButton(
             icon: Icon(Icons.edit),
@@ -35,6 +37,7 @@ class CustomerDetailPage extends StatelessWidget {
           ),
         ],
       ),
+
       body: Column(
         children: [
           _buildTransactionsHeader(context),

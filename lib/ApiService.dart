@@ -204,3 +204,61 @@ Future<bool> createOrLinkCustomer(String name, String phone, int businessId) asy
     return false;
   }
 }
+
+Future<bool> createTransaction({
+  required String customerAccountId,
+  required double amount,
+  required String transactionType,
+  DateTime? date,
+  TimeOfDay? time,
+  String? notes,
+  String? attachmentPath,
+}) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? authToken = prefs.getString('authToken');
+  var url = Uri.parse('http://farmapp.channab.com/customers/api/add-transaction/');
+
+  Map<String, String> headers = {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Authorization': 'Token $authToken',
+  };
+
+  // Ensure customerAccountId is an integer
+  int customerAccountIdInt = int.tryParse(customerAccountId) ?? 0; // Adjust as necessary
+
+  Map<String, dynamic> body = {
+    'customer_account': customerAccountIdInt,
+    'amount': amount,
+    'transaction_type': transactionType,
+    'notes': notes ?? '',
+    'date': date != null ? "${date.year}-${date.month}-${date.day}" : '',
+    'time': time != null ? "${time.hour}:${time.minute}:00" : '',
+  };
+
+  print('Making API Call to Add Transaction...');
+  print('URL: $url');
+  print('Headers: $headers');
+  print('Body: $body');
+
+  try {
+    var response = await http.post(
+      url,
+      headers: headers,
+      body: jsonEncode(body),
+    );
+
+    print('Response Status: ${response.statusCode}');
+    print('Response Body: ${response.body}');
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print('Transaction created successfully');
+      return true;
+    } else {
+      print('Failed to create transaction: ${response.statusCode}');
+      return false;
+    }
+  } catch (e) {
+    print('Error creating transaction: $e');
+    return false;
+  }
+}

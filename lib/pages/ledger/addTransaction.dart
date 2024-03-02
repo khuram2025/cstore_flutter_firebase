@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../ApiService.dart';
+
 class AddTransactionScreen extends StatefulWidget {
   final bool isGiven;
 
@@ -38,8 +40,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               _buildUserDropdown(),
               _buildAmountInput(),
               _buildDateTimeInput(context),
-
-              _buildInvoiceUploadRow(),
+              _buildNoteInput(),
               _buildSubmitButton(context),
             ],
           ),
@@ -83,7 +84,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
-
   Widget _buildDateTimeInput(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20.0),
@@ -126,41 +126,52 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
-  Widget _buildInvoiceUploadRow() {
+  Widget _buildNoteInput() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Upload Invoice',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          IconButton(
-            icon: Icon(Icons.camera_alt),
-            onPressed: () {
-              // Logic to take a photo for the invoice
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.image),
-            onPressed: () {
-              // Logic to select an invoice image from the gallery
-            },
-          ),
-        ],
+      child: TextField(
+        controller: _noteController,
+        decoration: InputDecoration(
+          labelText: 'Note',
+          border: OutlineInputBorder(),
+        ),
+        keyboardType: TextInputType.text,
+        maxLines: 3,
       ),
     );
   }
 
   Widget _buildSubmitButton(BuildContext context) {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+      width: double.infinity, // Use full width
       padding: const EdgeInsets.symmetric(vertical: 20.0),
       child: ElevatedButton(
         child: Text('Submit', style: TextStyle(color: Colors.white)),
-        onPressed: () {
-          // Submit logic
+        onPressed: () async {
+          // Assuming selectedUser somehow maps to customerAccountId
+          String customerAccountId = "appropriate_customer_account_id"; // This should be set based on your application's logic
+          double amount = double.tryParse(_amountController.text) ?? 0;
+          String transactionType = widget.isGiven ? "Given" : "Received";
+          DateTime? date = _selectedDate;
+          String? notes = _noteController.text.isNotEmpty ? _noteController.text : null;
+
+          // Call createTransaction with dynamic values
+          bool result = await createTransaction(
+            customerAccountId: customerAccountId,
+            amount: amount,
+            transactionType: transactionType,
+            date: date,
+            time: TimeOfDay(hour: _selectedDate.hour, minute: _selectedDate.minute),
+            notes: notes,
+            // attachmentPath: You would handle attachment upload separately
+          );
+
+          if (result) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Transaction added successfully')));
+            Navigator.pop(context); // Optionally pop back to the previous screen
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add transaction')));
+          }
         },
         style: ElevatedButton.styleFrom(
           primary: Colors.green, // Green background
@@ -171,5 +182,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       ),
     );
   }
-}
 
+
+
+
+}
