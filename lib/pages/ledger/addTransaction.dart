@@ -2,28 +2,43 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../ApiService.dart';
+import '../../model/data.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final bool isGiven;
+  final String customerId; // Add customerId as a parameter
+  final String customerName; // Add customerName as a parameter
 
-  const AddTransactionScreen({Key? key, required this.isGiven}) : super(key: key);
+  const AddTransactionScreen({
+    Key? key,
+    required this.isGiven,
+    required this.customerId, // Ensure it's required or provide a default/fallback value
+    required this.customerName, // Ensure it's required or provide a default/fallback value
+  }) : super(key: key);
+
 
   @override
   _AddTransactionScreenState createState() => _AddTransactionScreenState();
 }
 
+
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  String selectedUser = 'User 1';
-  List<String> users = ['User 1', 'User 2', 'User 3'];
+  String selectedUser = 'User 1'; // This will be replaced with actual logic.
+  // Assume customers list is populated either statically or from an API call for dropdown.
+  List<Customer> customers = [];
 
   @override
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
+    // Since selectedUser is used for dropdown, ensure the logic aligns with what you intend for customer selection.
+    selectedUser = widget.customerId; // Pre-select the customer based on passed ID.
+    print("AddTransactionScreen customerId: ${widget.customerId}"); // Print customerId to console.
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +68,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return DropdownButtonFormField<String>(
       value: selectedUser,
       decoration: InputDecoration(
-        labelText: 'User Name',
+        labelText: 'Customer Name',
         border: OutlineInputBorder(),
       ),
       onChanged: (String? newValue) {
@@ -61,14 +76,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           selectedUser = newValue!;
         });
       },
-      items: users.map<DropdownMenuItem<String>>((String value) {
+      items: customers.map<DropdownMenuItem<String>>((Customer customer) {
         return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
+          value: customer.id.toString(),
+          child: Text(customer.name),
         );
       }).toList(),
     );
   }
+
 
   Widget _buildAmountInput() {
     return Padding(
@@ -148,14 +164,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: ElevatedButton(
         child: Text('Submit', style: TextStyle(color: Colors.white)),
         onPressed: () async {
-          // Assuming selectedUser somehow maps to customerAccountId
-          String customerAccountId = "appropriate_customer_account_id"; // This should be set based on your application's logic
+          // Use widget.customerId directly for the customerAccountId
+          String customerAccountId = widget.customerId;
           double amount = double.tryParse(_amountController.text) ?? 0;
           String transactionType = widget.isGiven ? "Given" : "Received";
           DateTime? date = _selectedDate;
           String? notes = _noteController.text.isNotEmpty ? _noteController.text : null;
 
-          // Call createTransaction with dynamic values
+          // Update the API call to use the correct customerAccountId
           bool result = await createTransaction(
             customerAccountId: customerAccountId,
             amount: amount,
@@ -182,6 +198,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       ),
     );
   }
+
 
 
 

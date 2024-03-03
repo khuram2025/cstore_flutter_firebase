@@ -45,13 +45,17 @@ class _CustomerTabState extends State<CustomerTab> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => CustomerDetailPage(
-                      name: customer['name'],
-                      balanceDue: customer['balanceDue'].toString(), // Assuming you still need to pass this
-                      mobileNumber: customer['phone'] ?? 'No Mobile Number', // Assuming 'mobileNumber' is the key
-                    )),
+                    MaterialPageRoute(
+                      builder: (context) => CustomerDetailPage(
+                        name: customer['name'],
+                        balanceDue: customer['balanceDue'].toString(),
+                        mobileNumber: customer['phone'] ?? 'No Mobile Number',
+                        customerId: customer['id'].toString(), // Convert ID to string if it's not already
+                      ),
+                    ),
                   );
                 },
+
 
               );
             }).toList(),

@@ -4,16 +4,19 @@ import 'package:redesign_okcredit/pages/ledger/addTransaction.dart';
 
 class CustomerDetailPage extends StatelessWidget {
   final String name;
-  final String balanceDue; // Define balanceDue as a member variable
+  final String balanceDue;
   final String mobileNumber;
+  final String customerId;
 
-  // Modify the constructor to accept balanceDue.
-  const CustomerDetailPage({
+   CustomerDetailPage({
     Key? key,
     required this.name,
     required this.balanceDue,
-    required this.mobileNumber,// Add balanceDue as a required parameter
-  }) : super(key: key);
+    required this.mobileNumber,
+    required this.customerId,
+  }) : super(key: key) {
+    print("CustomerDetailPage customerId: $customerId"); // Add this line
+  }
 
 
 
@@ -244,19 +247,24 @@ class CustomerDetailPage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildActionButton(context, Icons.call_received, 'Received', Colors.green),
-        _buildActionButton(context, Icons.call_made, 'Given', Colors.red),
+        // Use `name` and `customerId` directly here
+        _buildActionButton(context, Icons.call_received, 'Received', Colors.green, name, customerId),
+        _buildActionButton(context, Icons.call_made, 'Given', Colors.red, name, customerId),
       ],
     );
   }
 
-  Widget _buildActionButton(BuildContext context, IconData icon, String label, Color color) {
+  Widget _buildActionButton(BuildContext context, IconData icon, String label, Color color, String customerName, String customerId) {
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AddTransactionScreen(isGiven: label == 'Given'),
+            builder: (context) => AddTransactionScreen(
+              isGiven: label == 'Given',
+              customerId: customerId,
+              customerName: name,
+            ),
           ),
         );
       },
@@ -269,4 +277,5 @@ class CustomerDetailPage extends StatelessWidget {
       ),
     );
   }
+
 }
