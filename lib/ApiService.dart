@@ -135,35 +135,6 @@ Future<Map<String, dynamic>?> fetchUserInfo(String authToken) async {
   return null;
 }
 
-Future<List<dynamic>> fetchCustomers() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? authToken = prefs.getString('authToken');
-  var url = Uri.parse('http://farmapp.channab.com/customers/api/customers/'); // Replace with your API URL
-
-  Map<String, String> headers = {
-    'Content-Type': 'application/json; charset=UTF-8',
-    'Authorization': 'Token $authToken', // Replace 'Token' if you use a different scheme
-  };
-
-  print("Headers: $headers");  // Debug print
-
-  try {
-    var response = await http.get(url, headers: headers);
-
-    if (response.statusCode == 200) {
-      print('Customers fetched successfully');
-      return jsonDecode(response.body);
-    } else {
-      print('Failed to fetch customers: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Error fetching customers: $e');
-  }
-
-  return []; // Return an empty list if the fetch operation fails
-}
-
-
 Future<List<CustomerAccount>> fetchCustomerAccounts() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? authToken = prefs.getString('authToken');
@@ -176,7 +147,17 @@ Future<List<CustomerAccount>> fetchCustomerAccounts() async {
 
   if (response.statusCode == 200) {
     List jsonResponse = json.decode(response.body);
+
+    // Iterate over jsonResponse to print each customer account ID
+    print("Fetched Customer Account IDs:");
+    for (var account in jsonResponse) {
+      print(account['id']); // Assuming 'id' is the key for the account ID in your JSON response
+      print("Response body: ${response.body}");
+
+    }
+
     return jsonResponse.map((data) => CustomerAccount.fromJson(data)).toList();
+
   } else {
     throw Exception('Failed to load customer accounts');
   }
@@ -224,61 +205,56 @@ Future<bool> createOrLinkCustomer(String name, String phone, int businessId) asy
     return false;
   }
 }
-
-Future<bool> createTransaction({
-  required String customerAccountId,
+Future<bool> addTransaction({
+  required int customerAccountId,
+  required DateTime date,
+  required TimeOfDay time,
   required double amount,
-  required String transactionType,
-  DateTime? date,
-  TimeOfDay? time,
-  String? notes,
+  required String transactionType, // 'Take' or 'Given'
+  String notes = '',
   String? attachmentPath,
 }) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? authToken = prefs.getString('authToken');
-  var url = Uri.parse('http://farmapp.channab.com/customers/api/add-transaction/');
 
-  Map<String, String> headers = {
-    'Content-Type': 'application/json; charset=UTF-8',
-    'Authorization': 'Token $authToken',
-  };
+  String formattedDate = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+  String formattedTime = "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
 
-  // Ensure customerAccountId is an integer
-  int customerAccountIdInt = int.tryParse(customerAccountId) ?? 0; // Adjust as necessary
+  print("Sending Transaction Data:");
+  print("Customer Account ID: $customerAccountId");
+  print("Date: $formattedDate");
+  print("Time: $formattedTime");
+  print("Amount: $amount");
+  print("Transaction Type: $transactionType");
+  print("Notes: $notes");
+  // Note: For security reasons, be cautious about printing authentication tokens or sensitive information in a production environment
 
-  Map<String, dynamic> body = {
-    'customer_account': customerAccountIdInt,
-    'amount': amount,
-    'transaction_type': transactionType,
-    'notes': notes ?? '',
-    'date': date != null ? "${date.year}-${date.month}-${date.day}" : '',
-    'time': time != null ? "${time.hour}:${time.minute}:00" : '',
-  };
+  var uri = Uri.parse('http://farmapp.channab.com/customers/api/add-transaction/');
+  var request = http.MultipartRequest('POST', uri)
+    ..fields['customer_account'] = customerAccountId.toString()
+    ..fields['date'] = formattedDate
+    ..fields['time'] = formattedTime
+    ..fields['amount'] = amount.toString()
+    ..fields['transaction_type'] = transactionType
+    ..fields['notes'] = notes
+    ..headers['Authorization'] = 'Token $authToken';
 
-  print('Making API Call to Add Transaction...');
-  print('URL: $url');
-  print('Headers: $headers');
-  print('Body: $body');
+  if (attachmentPath != null) {
+    print("Attaching file: $attachmentPath");
+    request.files.add(await http.MultipartFile.fromPath('attachment', attachmentPath));
+  }
 
-  try {
-    var response = await http.post(
-      url,
-      headers: headers,
-      body: jsonEncode(body),
-    );
+  var response = await request.send();
+  final responseBody = await response.stream.bytesToString();
 
-    print('Response Status: ${response.statusCode}');
-    print('Response Body: ${response.body}');
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      print('Transaction created successfully');
-      return true;
-    } else {
-      print('Failed to create transaction: ${response.statusCode}');
-      return false;
-    }
-  } catch (e) {
-    print('Error creating transaction: $e');
+  if (response.statusCode == 200) {
+    print("Transaction created successfully.");
+    print("Response Body: $responseBody");
+    return true;
+  } else {
+    print("Failed to create transaction.");
+    print("Response Status Code: ${response.statusCode}");
+    print("Response Body: $responseBody");
     return false;
   }
 }

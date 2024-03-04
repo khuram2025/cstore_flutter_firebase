@@ -54,7 +54,7 @@ class _CustomerTabState extends State<CustomerTab> {
                         name: customer.customerName,
                         balanceDue: customer.openingBalance,
                         mobileNumber: customer.mobileNumber,
-                        customerId: 'ID', // Adjust based on your data structure
+                        customerId: customer.id.toString(),
                       ),
                     ),
                   );

@@ -164,22 +164,22 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       child: ElevatedButton(
         child: Text('Submit', style: TextStyle(color: Colors.white)),
         onPressed: () async {
-          // Use widget.customerId directly for the customerAccountId
-          String customerAccountId = widget.customerId;
+          // Assuming `customerAccountId` is a string that needs to be converted
+          int customerAccountId = int.tryParse(widget.customerId) ?? 0; // Convert customerId to int, handle potential parsing error
           double amount = double.tryParse(_amountController.text) ?? 0;
-          String transactionType = widget.isGiven ? "Given" : "Received";
-          DateTime? date = _selectedDate;
-          String? notes = _noteController.text.isNotEmpty ? _noteController.text : null;
+          String transactionType = widget.isGiven ? "Given" : "Take"; // Ensure these values match your backend expectations
+          DateTime date = _selectedDate; // Date selected by the date picker
+          TimeOfDay time = TimeOfDay(hour: _selectedDate.hour, minute: _selectedDate.minute); // Time extracted from _selectedDate
+          String notes = _noteController.text; // Notes from the text field
 
-          // Update the API call to use the correct customerAccountId
-          bool result = await createTransaction(
+          bool result = await addTransaction(
             customerAccountId: customerAccountId,
+            date: date,
+            time: time,
             amount: amount,
             transactionType: transactionType,
-            date: date,
-            time: TimeOfDay(hour: _selectedDate.hour, minute: _selectedDate.minute),
             notes: notes,
-            // attachmentPath: You would handle attachment upload separately
+            // Assuming attachment handling is implemented elsewhere or not needed for this basic example
           );
 
           if (result) {
@@ -198,9 +198,5 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       ),
     );
   }
-
-
-
-
 
 }
