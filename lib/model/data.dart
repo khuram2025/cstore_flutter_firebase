@@ -215,3 +215,19 @@ class Customer {
 
   Customer({required this.id, required this.name});
 }
+
+class CustomerAccount {
+  final String customerName;
+  final String mobileNumber;
+  final String openingBalance;
+
+  CustomerAccount({required this.customerName, required this.mobileNumber, required this.openingBalance});
+
+  factory CustomerAccount.fromJson(Map<String, dynamic> json) {
+    return CustomerAccount(
+      customerName: json['customer_name'],
+      mobileNumber: json['mobile_number'],
+      openingBalance: json['opening_balance'].toString(),
+    );
+  }
+}

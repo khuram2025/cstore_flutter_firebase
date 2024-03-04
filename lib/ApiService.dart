@@ -4,6 +4,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'model/data.dart';
+
 Future<bool> loginUser(String mobile, String password) async {
   var url = Uri.parse('http://farmapp.channab.com/accounts/api/login/');
 
@@ -161,6 +163,24 @@ Future<List<dynamic>> fetchCustomers() async {
   return []; // Return an empty list if the fetch operation fails
 }
 
+
+Future<List<CustomerAccount>> fetchCustomerAccounts() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? authToken = prefs.getString('authToken');
+  final response = await http.get(
+    Uri.parse('http://farmapp.channab.com/customers/api/customer-accounts/'),
+    headers: {
+      'Authorization': 'Token $authToken',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    List jsonResponse = json.decode(response.body);
+    return jsonResponse.map((data) => CustomerAccount.fromJson(data)).toList();
+  } else {
+    throw Exception('Failed to load customer accounts');
+  }
+}
 
 Future<bool> createOrLinkCustomer(String name, String phone, int businessId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();

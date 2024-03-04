@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
-
+// Import ApiService or the specific file where fetchCustomerAccounts is defined
 import '../../ApiService.dart';
+import '../../model/data.dart';
 import '../../widgets/ledger/transaction_tile.dart';
 import 'customer/customerDetail.dart';
 
+// Assuming CustomerAccount class is defined in ApiService or another imported file
+// If not, make sure to import the file where CustomerAccount is defined
+
 class CustomerTab extends StatefulWidget {
-  const CustomerTab({super.key});
+  const CustomerTab({Key? key}) : super(key: key);
 
   @override
   _CustomerTabState createState() => _CustomerTabState();
 }
 
 class _CustomerTabState extends State<CustomerTab> {
-  List<dynamic> customers = [];
+  List<CustomerAccount> customers = [];
 
   @override
   void initState() {
     super.initState();
-    fetchCustomers().then((data) {
+    fetchCustomerAccounts().then((data) {
       setState(() {
         customers = data;
       });
@@ -32,31 +36,29 @@ class _CustomerTabState extends State<CustomerTab> {
         child: SingleChildScrollView(
           child: Column(
             children: customers.map((customer) {
-              // Assuming 'color' is an integer representation of a color in your customer data
-              int customerColor = customer['color'] ?? 0xff5099f5; // Default color if not provided
-
+              // Adjust according to the actual fields of CustomerAccount and your UI requirements
               return TransactionTile(
-                color: customerColor,
-                name: customer['name'] ?? 'Unknown', // Provide a fallback for an empty or null name
-                amount: customer['amount'].toString(), // Convert to string if necessary
-                remarks: customer['remarks'] ?? 'No Remarks', // Provide a fallback for null remarks
-                type: customer['type'] ?? 'Payment', // Provide a fallback for null type
-                date: customer['date'] ?? 'Unknown Date', // Provide a fallback for null date
+                color: Colors.blue.value, // Convert MaterialColor to int
+
+                name: customer.customerName,
+                amount: customer.openingBalance,
+                remarks: 'No Remarks', // Adjust based on your data
+                type: 'Payment', // Adjust based on your data
+                date: 'Unknown Date', // Adjust based on your data
                 onTap: () {
+                  // Adjust according to how you want to handle taps
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => CustomerDetailPage(
-                        name: customer['name'],
-                        balanceDue: customer['balanceDue'].toString(),
-                        mobileNumber: customer['phone'] ?? 'No Mobile Number',
-                        customerId: customer['id'].toString(), // Convert ID to string if it's not already
+                        name: customer.customerName,
+                        balanceDue: customer.openingBalance,
+                        mobileNumber: customer.mobileNumber,
+                        customerId: 'ID', // Adjust based on your data structure
                       ),
                     ),
                   );
                 },
-
-
               );
             }).toList(),
           ),
@@ -65,5 +67,3 @@ class _CustomerTabState extends State<CustomerTab> {
     );
   }
 }
-
-
