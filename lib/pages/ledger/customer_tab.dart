@@ -38,13 +38,13 @@ class _CustomerTabState extends State<CustomerTab> {
             children: customers.map((customer) {
               // Adjust according to the actual fields of CustomerAccount and your UI requirements
               return TransactionTile(
-                color: Colors.blue.value, // Convert MaterialColor to int
-
+                color: Colors.blue.value, // This is just an example, adjust as needed
                 name: customer.customerName,
-                amount: customer.openingBalance,
-                remarks: 'No Remarks', // Adjust based on your data
-                type: 'Payment', // Adjust based on your data
-                date: 'Unknown Date', // Adjust based on your data
+                amount: customer.openingBalance, // This might now represent the opening balance
+                remarks: customer.totalBalance, // Assuming totalBalance is a property of your CustomerAccount model
+                type: 'Transaction Type', // Adjust based on your data
+                date: 'Transaction Date', // Adjust based on your data
+                openingBalance: customer.openingBalance, // Ensure this property exists and is passed
                 onTap: () {
                   // Adjust according to how you want to handle taps
                   Navigator.push(
@@ -55,11 +55,14 @@ class _CustomerTabState extends State<CustomerTab> {
                         balanceDue: customer.openingBalance,
                         mobileNumber: customer.mobileNumber,
                         customerId: customer.id.toString(),
+                          totalBalance: customer.totalBalance,
+
                       ),
                     ),
                   );
                 },
               );
+
             }).toList(),
           ),
         ),

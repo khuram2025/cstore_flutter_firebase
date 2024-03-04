@@ -221,12 +221,14 @@ class CustomerAccount {
   final String customerName;
   final String mobileNumber;
   final String openingBalance;
+  final String totalBalance; // Add this line
 
   CustomerAccount({
     required this.id,
     required this.customerName,
     required this.mobileNumber,
     required this.openingBalance,
+    required this.totalBalance, // Add this line
   });
 
   factory CustomerAccount.fromJson(Map<String, dynamic> json) {
@@ -234,7 +236,38 @@ class CustomerAccount {
       id: json['id'] as int,
       customerName: json['customer_name'] as String,
       mobileNumber: json['mobile_number'] as String,
-      openingBalance: json['opening_balance'] as String,
+      openingBalance: json['opening_balance'].toString(),
+      totalBalance: json['total_balance'].toString(), // Modify this line accordingly
+    );
+  }
+}
+
+
+class Transaction {
+  final int id;
+  final DateTime date;
+  final String time; // Assuming time is a string like '14:00'
+  final String description; // Assuming you have a description or note field
+  final String amount;
+  final String transactionType; // 'Take' or 'Given'
+
+  Transaction({
+    required this.id,
+    required this.date,
+    required this.time,
+    required this.description,
+    required this.amount,
+    required this.transactionType,
+  });
+
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    return Transaction(
+      id: json['id'],
+      date: DateTime.parse(json['date']),
+      time: json['time'],
+      description: json['notes'], // Change 'notes' to your actual description field if different
+      amount: json['amount'].toString(),
+      transactionType: json['transaction_type'],
     );
   }
 }

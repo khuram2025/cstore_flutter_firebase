@@ -205,6 +205,7 @@ Future<bool> createOrLinkCustomer(String name, String phone, int businessId) asy
     return false;
   }
 }
+
 Future<bool> addTransaction({
   required int customerAccountId,
   required DateTime date,
@@ -255,5 +256,32 @@ Future<bool> addTransaction({
     print("Response Status Code: ${response.statusCode}");
     print("Response Body: $responseBody");
     return false;
+  }
+}
+Future<List<Transaction>> fetchTransactions(int customerAccountId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? authToken = prefs.getString('authToken');
+  final String apiUrl = 'http://farmapp.channab.com/customers/api/transactions/$customerAccountId/';
+
+  Map<String, String> headers = {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Authorization': 'Token $authToken',
+  };
+
+  print('Fetching Transactions: $apiUrl'); // Print the URL
+  print('Using Headers: $headers'); // Print the headers
+
+  final response = await http.get(Uri.parse(apiUrl), headers: headers);
+
+  print('Response Status: ${response.statusCode}'); // Print the response status code
+  print('Response Body: ${response.body}'); // Print the response body
+
+  if (response.statusCode == 200) {
+    List jsonResponse = json.decode(response.body);
+    // Assuming your Transaction model has a fromJson factory constructor
+    return jsonResponse.map((transaction) => Transaction.fromJson(transaction)).toList();
+  } else {
+    print('Failed to fetch transactions: ${response.statusCode}');
+    throw Exception('Failed to load transactions');
   }
 }

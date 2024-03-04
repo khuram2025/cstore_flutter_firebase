@@ -2,59 +2,54 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:redesign_okcredit/pages/ledger/addTransaction.dart';
 
+import '../../../ApiService.dart';
+import '../../../constants.dart';
+import '../../../model/data.dart';
+
 class CustomerDetailPage extends StatelessWidget {
   final String name;
   final String balanceDue;
   final String mobileNumber;
+  final String totalBalance;
   final String customerId;
 
-   CustomerDetailPage({
+  CustomerDetailPage({
     Key? key,
     required this.name,
     required this.balanceDue,
+    required this.totalBalance,
     required this.mobileNumber,
     required this.customerId,
-  }) : super(key: key) {
-    print("CustomerDetailPage customerId: $customerId"); // Add this line
-  }
-
-
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('$name ($mobileNumber)'), // Display both name and mobile number
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () {
-              // Action for edit
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.more_vert),
-            onPressed: () {
-              // Action for more options
-            },
-          ),
-        ],
+        title: Text('$name ($mobileNumber)'),
       ),
-
       body: Column(
         children: [
           _buildTransactionsHeader(context),
           Expanded(
-            child: ListView.builder(
-              itemCount: 10, // Replace with your actual number of transactions
-              itemBuilder: (context, index) {
-                return _buildTransactionItem(
-                  context,
-                  // Replace with your actual transaction data
-                  date: DateTime.now(),
-                  description: 'Description of the transaction goes here...',
-                  amount: '₹100',
-                );
+            child: FutureBuilder<List<Transaction>>(
+              future: fetchTransactions(int.parse(customerId)),
+
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                } else {
+                  final transactions = snapshot.data ?? [];
+                  return ListView.builder(
+                    itemCount: transactions.length,
+                    itemBuilder: (context, index) {
+                      final transaction = transactions[index];
+                      return _buildTransactionItem(context, transaction: transaction);
+                    },
+                  );
+                }
               },
             ),
           ),
@@ -83,100 +78,6 @@ class CustomerDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionItem(BuildContext context,
-      {required DateTime date, required String description, required String amount}) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0), // Add horizontal padding
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Date and Time Column
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      DateFormat('dd/MM/yyyy').format(date),
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      DateFormat.jm().format(date), // Format time
-                      style: TextStyle(fontSize: 20, color: Colors.grey[600]), // Match icon size
-                    ),
-                  ],
-                ),
-              ),
-              // Description and Icons Row
-              Expanded(
-                flex: 4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      description.length > 10
-                          ? '${description.substring(0, 10)}...'
-                          : description,
-                      style: TextStyle(color: Colors.grey[600]), // Lighter font for description
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.edit, size: 20, color: Colors.grey[600]),
-                          onPressed: () {
-                            // Edit action
-                          },
-                          padding: EdgeInsets.zero, // Reduces default padding
-                          constraints: BoxConstraints(), // Limits hit area to icon size
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete, size: 20, color: Colors.grey[600]),
-                          onPressed: () {
-                            // Delete action
-                          },
-                          padding: EdgeInsets.zero,
-                          constraints: BoxConstraints(),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.attach_file, size: 20, color: Colors.grey[600]),
-                          onPressed: () {
-                            // Attachment action
-                          },
-                          padding: EdgeInsets.zero,
-                          constraints: BoxConstraints(),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.visibility, size: 20, color: Colors.grey[600]),
-                          onPressed: () {
-                            // View detail action
-                          },
-                          padding: EdgeInsets.zero,
-                          constraints: BoxConstraints(),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              // Amount Text
-              Expanded(
-                flex: 1,
-                child: Text(
-                  amount,
-                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Divider(), // Divider after each transaction item
-      ],
-    );
-  }
-
 
   Widget _buildBottomSheet(BuildContext context) {
     return Container(
@@ -196,20 +97,27 @@ class CustomerDetailPage extends StatelessWidget {
   }
 
   Widget _buildBalanceDueSection() {
+    // Assuming totalBalance is a String that may include a minus sign for negative values
+    final bool isBalancePositive = !totalBalance.startsWith('-');
+    final Color balanceColor = isBalancePositive ? Colors.green : Colors.red;
+
+    // If you want to remove the minus sign for display, you can conditionally format the string
+    final String displayBalance = isBalancePositive ? totalBalance : totalBalance.substring(1);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Balance Due',
+          'Total Balance',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         Text(
-          balanceDue,
+          'Rs.$displayBalance',
           style: TextStyle(
-            color: Colors.red,
+            color: balanceColor, // Color based on positive or negative balance
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -217,6 +125,8 @@ class CustomerDetailPage extends StatelessWidget {
       ],
     );
   }
+
+
 
   Widget _buildReminderButtons() {
     return Row(
@@ -277,5 +187,72 @@ class CustomerDetailPage extends StatelessWidget {
       ),
     );
   }
+
+
+  Widget _buildTransactionItem(BuildContext context, {required Transaction transaction}) {
+    // Parse the amount to a double
+    final double amount = double.parse(transaction.amount);
+
+    // Determine if the amount is a whole number
+    final bool isWholeNumber = amount == amount.truncate();
+
+    // Format the amount based on whether it's a whole number or not
+    final String formattedAmount = isWholeNumber ? '${amount.toInt()}' : amount.toStringAsFixed(2);
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      DateFormat('dd/MM/yyyy').format(transaction.date),
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    if (transaction.time != null) // Check if time is provided
+                      Text(
+                        transaction.time!,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 4,
+                child: Text(
+                  transaction.description,
+                  style: TextStyle(color: Colors.grey[600]),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  'Rs.$formattedAmount', // Use formatted amount here
+                  style: TextStyle(
+                    color: transaction.transactionType == 'Given' ? Colors.red : Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Divider(
+          color: kHighLightColor, // Use your constant color here
+          height: 5, // Adjust thickness
+        ),
+      ],
+    );
+  }
+
+
 
 }
