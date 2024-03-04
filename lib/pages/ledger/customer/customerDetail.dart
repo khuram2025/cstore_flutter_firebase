@@ -5,6 +5,7 @@ import 'package:redesign_okcredit/pages/ledger/addTransaction.dart';
 import '../../../ApiService.dart';
 import '../../../constants.dart';
 import '../../../model/data.dart';
+import '../../../widgets/ledger/buildReceivedGivenIndicators.dart';
 
 class CustomerDetailPage extends StatelessWidget {
   final String name;
@@ -30,6 +31,7 @@ class CustomerDetailPage extends StatelessWidget {
       ),
       body: Column(
         children: [
+          ReceivedGivenIndicators(totalBalance: totalBalance),
           _buildTransactionsHeader(context),
           Expanded(
             child: FutureBuilder<List<Transaction>>(
