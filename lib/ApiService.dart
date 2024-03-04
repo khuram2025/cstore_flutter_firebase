@@ -247,12 +247,11 @@ Future<bool> addTransaction({
   var response = await request.send();
   final responseBody = await response.stream.bytesToString();
 
-  if (response.statusCode == 200) {
+  if (response.statusCode == 201) {
     print("Transaction created successfully.");
     print("Response Body: $responseBody");
     return true;
   } else {
-    print("Failed to create transaction.");
     print("Response Status Code: ${response.statusCode}");
     print("Response Body: $responseBody");
     return false;
