@@ -8,9 +8,17 @@ class ReceivedGivenIndicators extends StatelessWidget {
     required this.totalBalance, // Accept totalBalance as a parameter
   }) : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
+    // Convert totalBalance to a number and check if it's negative or positive
+    final double balance = double.tryParse(totalBalance) ?? 0.0;
+    final bool isNegative = balance < 0;
+
+    // Define color based on the balance
+    final Color primaryColor = isNegative ? Colors.red.shade700 : Colors.green.shade700;
+    final Color backgroundColor = isNegative ? Colors.red.shade100 : Colors.green.shade100;
+    final IconData arrowIcon = isNegative ? Icons.arrow_downward : Icons.arrow_upward;
+
     double screenWidth = MediaQuery.of(context).size.width;
     // Calculate the available width after subtracting the horizontal padding
     double availableWidth = screenWidth - 20; // Adjusted for total padding
@@ -25,8 +33,8 @@ class ReceivedGivenIndicators extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.green.shade100,
-              border: Border.all(color: Colors.green.shade700),
+              color: backgroundColor,
+              border: Border.all(color: primaryColor),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
@@ -38,9 +46,9 @@ class ReceivedGivenIndicators extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.arrow_upward, color: Colors.green.shade700, size: 40),
+                        Icon(arrowIcon, color: primaryColor, size: 40),
                         SizedBox(width: 4),
-                        Text('Rs.$totalBalance', style: TextStyle(color: Colors.green.shade700, fontSize: 30)),
+                        Text('Rs.$totalBalance', style: TextStyle(color: primaryColor, fontSize: 30)),
                       ],
                     ),
                     Container(
@@ -52,9 +60,9 @@ class ReceivedGivenIndicators extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.calendar_today, color: Colors.green.shade700, size: 16),
+                          Icon(Icons.calendar_today, color: primaryColor, size: 16),
                           SizedBox(width: 4),
-                          Text('2 Apr', style: TextStyle(color: Colors.green.shade700)),
+                          Text('2 Apr', style: TextStyle(color: primaryColor)),
                         ],
                       ),
                     ),
@@ -63,9 +71,9 @@ class ReceivedGivenIndicators extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _iconButton(Icons.message, "Whatsapp", Colors.green.shade700),
-                    _iconButton(Icons.message, "Message", Colors.green.shade700),
-                    _iconButton(Icons.call, "Call", Colors.green.shade700),
+                    _iconButton(Icons.message, "Whatsapp", primaryColor),
+                    _iconButton(Icons.message, "Message", primaryColor),
+                    _iconButton(Icons.call, "Call", primaryColor),
                   ],
                 ),
               ],

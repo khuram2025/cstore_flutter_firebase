@@ -160,16 +160,16 @@ class _SettingsPageState extends State<SettingsPage> {
                     Expanded(
                       child: ListView(
                         children: [
-                          SettingTile(
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              SubscriptionPage.id,
-                            ),
-                            icon: Icons.stars,
-                            title: 'OkCredit Subscription Plan',
-                            subTitle:
-                                'Unlimited SMS, Ad Free, Priority Customer Support',
-                          ),
+                          // SettingTile(
+                          //   onTap: () => Navigator.pushNamed(
+                          //     context,
+                          //     SubscriptionPage.id,
+                          //   ),
+                          //   icon: Icons.stars,
+                          //   title: 'OkCredit Subscription Plan',
+                          //   subTitle:
+                          //       'Unlimited SMS, Ad Free, Priority Customer Support',
+                          // ),
                           SettingTile(
                             onTap: () => Navigator.pushNamed(
                               context,
@@ -215,14 +215,14 @@ class _SettingsPageState extends State<SettingsPage> {
                             title: 'Help',
                             subTitle: 'FAQs, contact us, privacy policy',
                           ),
-                          SettingTile(
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              FindDefaulterPage.id,
-                            ),
-                            icon: Icons.person_off,
-                            title: 'Find Defaulter',
-                          ),
+                          // SettingTile(
+                          //   onTap: () => Navigator.pushNamed(
+                          //     context,
+                          //     FindDefaulterPage.id,
+                          //   ),
+                          //   icon: Icons.person_off,
+                          //   title: 'Find Defaulter',
+                          // ),
                           SettingTile(
                             onTap: () => Navigator.pushNamed(
                               context,
@@ -255,14 +255,14 @@ class _SettingsPageState extends State<SettingsPage> {
                               icon: Icons.logout,
                               title: 'Logout',
                             ),
-                          SettingTile(
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              SignupPage.id, // Replace with the ID or route name of your signup page
-                            ),
-                            icon: Icons.app_registration,
-                            title: 'Signup',
-                          ),
+                          // SettingTile(
+                          //   onTap: () => Navigator.pushNamed(
+                          //     context,
+                          //     SignupPage.id, // Replace with the ID or route name of your signup page
+                          //   ),
+                          //   icon: Icons.app_registration,
+                          //   title: 'Signup',
+                          // ),
                         ],
                       ),
                     ),

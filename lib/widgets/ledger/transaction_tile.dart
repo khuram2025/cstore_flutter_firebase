@@ -27,7 +27,7 @@ class TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     // Determine the color based on the total balance
     final bool isBalancePositive = double.parse(remarks) >= 0;
-    final Color balanceColor = isBalancePositive ? Colors.green : Colors.red;
+    final Color balanceColor = isBalancePositive ? Colors.red : Colors.green;
 
     // Format balance to always show as a positive number
     final String formattedBalance = (double.parse(remarks)).abs().toStringAsFixed(2);

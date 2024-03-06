@@ -101,7 +101,7 @@ class CustomerDetailPage extends StatelessWidget {
   Widget _buildBalanceDueSection() {
     // Assuming totalBalance is a String that may include a minus sign for negative values
     final bool isBalancePositive = !totalBalance.startsWith('-');
-    final Color balanceColor = isBalancePositive ? Colors.green : Colors.red;
+    final Color balanceColor = isBalancePositive ? Colors.red : Colors.green;
 
     // If you want to remove the minus sign for display, you can conditionally format the string
     final String displayBalance = isBalancePositive ? totalBalance : totalBalance.substring(1);
