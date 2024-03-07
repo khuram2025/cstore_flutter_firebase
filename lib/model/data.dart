@@ -243,6 +243,14 @@ class CustomerAccount {
 }
 
 
+class SummaryData {
+  final int totalCustomers;
+  final String totalSum;
+
+  SummaryData({required this.totalCustomers, required this.totalSum});
+}
+
+
 class Transaction {
   final int id;
   final DateTime date;

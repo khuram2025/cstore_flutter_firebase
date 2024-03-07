@@ -40,7 +40,7 @@ class LedgerPageHeader extends StatelessWidget {
         ),
         const SizedBox(width: 1.0),
         const Text(
-          'kCredit',
+          'Channab',
           style: TextStyle(
             fontSize: 25.0,
             fontWeight: FontWeight.bold,

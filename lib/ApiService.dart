@@ -146,22 +146,46 @@ Future<List<CustomerAccount>> fetchCustomerAccounts() async {
   );
 
   if (response.statusCode == 200) {
-    List jsonResponse = json.decode(response.body);
+    var jsonResponse = json.decode(response.body);
 
-    // Iterate over jsonResponse to print each customer account ID
-    print("Fetched Customer Account IDs:");
-    for (var account in jsonResponse) {
-      print(account['id']); // Assuming 'id' is the key for the account ID in your JSON response
-      print("Response body: ${response.body}");
+    print("Fetched Customer Account IDs and Response Data:");
+    print("Total Customers: ${jsonResponse['total_customers']}");
+    print("Total Sum: ${jsonResponse['total_sum']}");
+    print("Accounts: ${jsonResponse['accounts']}");
 
-    }
 
-    return jsonResponse.map((data) => CustomerAccount.fromJson(data)).toList();
+    List<CustomerAccount> customerAccounts = (jsonResponse['accounts'] as List)
+        .map((data) => CustomerAccount.fromJson(data))
+        .toList();
 
+    return customerAccounts;
   } else {
     throw Exception('Failed to load customer accounts');
   }
 }
+
+Future<SummaryData> fetchSummaryData() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? authToken = prefs.getString('authToken');
+  final Uri apiUri = Uri.parse('http://farmapp.channab.com/customers/api/customer-accounts/');
+  final response = await http.get(apiUri, headers: {'Authorization': 'Token $authToken'});
+
+  if (response.statusCode == 200) {
+    var jsonResponse = json.decode(response.body);
+
+    print("Fetched Summary Data:");
+    print("Total Customers: ${jsonResponse['total_customers']}");
+    print("Total Sum: ${jsonResponse['total_sum']}");
+
+    return SummaryData(
+      totalCustomers: jsonResponse['total_customers'],
+      totalSum: jsonResponse['total_sum'].toString(),
+    );
+  } else {
+    throw Exception('Failed to load summary data');
+  }
+}
+
 
 Future<bool> createOrLinkCustomer(String name, String phone, int businessId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();

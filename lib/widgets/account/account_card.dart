@@ -9,12 +9,16 @@ class AccountCard extends StatelessWidget {
     required this.paymentType,
     required this.amount,
     required this.icon,
+    this.totalCustomers = 0, // Add this line
+    this.totalSum = '0', // Add this line
   });
 
   final IconData icon;
   final String accountType;
   final String paymentType;
   final String amount;
+  final int totalCustomers; // Add this line
+  final String totalSum; // Add this line
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +60,7 @@ class AccountCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '₹$amount',
+                'Rs.$totalSum',
                 style: const TextStyle(
                   color: Colors.red,
                   fontSize: 16.0,
@@ -74,7 +78,7 @@ class AccountCard extends StatelessWidget {
                 size: 18.0,
               ),
               const SizedBox(width: 8.0),
-              Text('2 $accountType'),
+              Text('$totalCustomers Customers'),
               const Spacer(),
               Text(paymentType == 'R' ? 'You Get' : 'You Give'),
             ],

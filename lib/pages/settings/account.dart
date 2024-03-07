@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
 
+import '../../ApiService.dart';
 import '../../constants.dart';
+import '../../model/data.dart';
 import '../../widgets/custom_back_button.dart';
 import '../../widgets/account/account_card.dart';
 import '../../widgets/settings/setting_tile.dart';
 
-class AccountPage extends StatelessWidget {
+class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
   static const id = '/accountPage';
+
+  @override
+  State<AccountPage> createState() => _AccountPageState();
+}
+
+class _AccountPageState extends State<AccountPage> {
+  late Future<SummaryData> summaryDataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    summaryDataFuture = fetchSummaryData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,17 +34,25 @@ class AccountPage extends StatelessWidget {
           child: Column(
             children: [
               const CustomBackButton(title: 'Account'),
-              const AccountCard(
-                icon: Icons.book,
-                accountType: 'Customer',
-                paymentType: 'R',
-                amount: '750',
-              ),
-              const AccountCard(
-                icon: Icons.local_shipping_sharp,
-                accountType: 'Supplier',
-                paymentType: 'G',
-                amount: '200',
+              FutureBuilder<SummaryData>(
+                future: summaryDataFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                    final totalCustomers = snapshot.data!.totalCustomers;
+                    final totalSum = snapshot.data!.totalSum;
+                    return AccountCard(
+                      icon: Icons.book,
+                      accountType: 'Customer',
+                      paymentType: 'R',
+                      amount: totalSum, // Dynamically fetched total sum
+                      totalCustomers: totalCustomers, // Dynamically fetched total customers
+                      totalSum: totalSum, // Dynamically fetched total sum
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text("Error: ${snapshot.error}");
+                  }
+                  return CircularProgressIndicator(); // Loading state
+                },
               ),
               Container(
                 decoration: BoxDecoration(
@@ -41,7 +64,8 @@ class AccountPage extends StatelessWidget {
                   title: 'Download Backup',
                   hideDivider: true,
                 ),
-              )
+              ),
+              // Add more widgets as needed
             ],
           ),
         ),
@@ -49,3 +73,5 @@ class AccountPage extends StatelessWidget {
     );
   }
 }
+
+
