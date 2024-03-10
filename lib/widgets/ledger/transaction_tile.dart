@@ -6,7 +6,7 @@ class TransactionTile extends StatelessWidget {
     super.key,
     required this.color,
     required this.name,
-    required this.amount,
+
     required this.remarks, // Now used for total balance
     required this.type,
     required this.date,
@@ -16,7 +16,7 @@ class TransactionTile extends StatelessWidget {
 
   final int color;
   final String name;
-  final String amount;
+
   final String remarks; // Total balance
   final String type;
   final String date;
@@ -87,7 +87,7 @@ class TransactionTile extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                       children: [
-                        TextSpan(text: "Opening Balance: ₹$amount", style: TextStyle(color: Colors.grey.shade600)), // Show opening balance
+                        TextSpan(style: TextStyle(color: Colors.grey.shade600)), // Show opening balance
                         TextSpan(
                           text: ' $type added on ',
                           style: TextStyle(

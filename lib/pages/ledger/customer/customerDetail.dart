@@ -6,28 +6,55 @@ import '../../../ApiService.dart';
 import '../../../constants.dart';
 import '../../../model/data.dart';
 import '../../../widgets/ledger/buildReceivedGivenIndicators.dart';
+import 'customerProfileedit.dart';
 
 class CustomerDetailPage extends StatelessWidget {
   final String name;
-  final String balanceDue;
+
   final String mobileNumber;
   final String totalBalance;
   final String customerId;
+  final String opening_balance;
 
   CustomerDetailPage({
     Key? key,
     required this.name,
-    required this.balanceDue,
+
     required this.totalBalance,
     required this.mobileNumber,
     required this.customerId,
-  }) : super(key: key);
+    required this.opening_balance,
+  }) : super(key: key) {
+    print("Opening Balance Received: $opening_balance");
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('$name ($mobileNumber)'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CustomerProfileEdit(
+                    name: name,
+                    mobileNumber: mobileNumber,
+                    customerId: customerId,
+                    openingBalance: opening_balance, // Corrected from opening_balance to openingBalance
+                  ),
+                ),
+
+              );
+
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

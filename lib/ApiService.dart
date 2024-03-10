@@ -148,10 +148,6 @@ Future<List<CustomerAccount>> fetchCustomerAccounts() async {
   if (response.statusCode == 200) {
     var jsonResponse = json.decode(response.body);
 
-    print("Fetched Customer Account IDs and Response Data:");
-    print("Total Customers: ${jsonResponse['total_customers']}");
-    print("Total Sum: ${jsonResponse['total_sum']}");
-    print("Accounts: ${jsonResponse['accounts']}");
 
 
     List<CustomerAccount> customerAccounts = (jsonResponse['accounts'] as List)
@@ -229,6 +225,50 @@ Future<bool> createOrLinkCustomer(String name, String phone, int businessId) asy
     return false;
   }
 }
+
+Future<bool> editCustomerAccountProfile(int accountId, String name, String phone, String openingBalance) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? authToken = prefs.getString('authToken');
+  var url = Uri.parse('http://farmapp.channab.com/customers/api/customer-accounts/edit/$accountId/'); // Ensure this is the correct URL
+
+  Map<String, String> headers = {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Authorization': 'Token $authToken',
+  };
+
+  Map<String, dynamic> body = {
+    'name': name,
+    'phone': phone,
+    'opening_balance': openingBalance,
+  };
+
+  print('URL: $url'); // Debugging: Print the URL
+  print('Headers: $headers'); // Debugging: Print the headers
+  print('Body: $body'); // Debugging: Print the body
+
+  try {
+    var response = await http.put(
+      url,
+      headers: headers,
+      body: jsonEncode(body),
+    );
+
+    print('Response Status: ${response.statusCode}'); // Debugging: Print the response status
+    print('Response Body: ${response.body}'); // Debugging: Print the response body
+
+    if (response.statusCode == 200) {
+      print('Customer account profile edited successfully');
+      return true;
+    } else {
+      print('Failed to edit customer account profile: ${response.statusCode}');
+      return false;
+    }
+  } catch (e) {
+    print('Error editing customer account profile: $e');
+    return false;
+  }
+}
+
 
 Future<bool> addTransaction({
   required int customerAccountId,

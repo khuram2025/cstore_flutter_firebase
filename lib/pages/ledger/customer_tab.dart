@@ -40,7 +40,7 @@ class _CustomerTabState extends State<CustomerTab> {
               return TransactionTile(
                 color: Colors.blue.value, // This is just an example, adjust as needed
                 name: customer.customerName,
-                amount: customer.openingBalance, // This might now represent the opening balance
+
                 remarks: customer.totalBalance, // Assuming totalBalance is a property of your CustomerAccount model
                 type: 'Transaction Type', // Adjust based on your data
                 date: 'Transaction Date', // Adjust based on your data
@@ -52,14 +52,15 @@ class _CustomerTabState extends State<CustomerTab> {
                     MaterialPageRoute(
                       builder: (context) => CustomerDetailPage(
                         name: customer.customerName,
-                        balanceDue: customer.openingBalance,
+                        totalBalance: customer.totalBalance,
                         mobileNumber: customer.mobileNumber,
                         customerId: customer.id.toString(),
-                          totalBalance: customer.totalBalance,
-
+                        opening_balance: customer.openingBalance.toString(), // Corrected parameter name
                       ),
                     ),
                   );
+
+
                 },
               );
 
