@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../constants.dart';
 import '../model/data.dart';
 import 'ledger/customer_tab.dart';
+import 'ledger/ledger_summary.dart';
 import 'ledger/supplier_tab.dart';
 import './ledger/add_contact.dart';
 import '../widgets/ledger/header.dart';
@@ -43,6 +44,8 @@ class LedgerPage extends StatelessWidget {
                 const SizedBox(height: 20.0),
                 const SearchBox(),
                 const SizedBox(height: 15.0),
+                const LedgerSummary(), // Add the new container here
+                const SizedBox(height: 15.0), // Optional spacing
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

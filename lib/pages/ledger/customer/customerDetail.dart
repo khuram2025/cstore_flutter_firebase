@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:redesign_okcredit/pages/ledger/addTransaction.dart';
+import 'package:redesign_okcredit/pages/ledger/customer/editTransaction.dart';
 
 import '../../../ApiService.dart';
 import '../../../constants.dart';
@@ -62,7 +63,7 @@ class CustomerDetailPage extends StatelessWidget {
           _buildTransactionsHeader(context),
           Expanded(
             child: FutureBuilder<List<Transaction>>(
-              future: fetchTransactions(int.parse(customerId)),
+              future: fetchTransactions(context, int.parse(customerId)),
 
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -219,69 +220,149 @@ class CustomerDetailPage extends StatelessWidget {
 
 
   Widget _buildTransactionItem(BuildContext context, {required Transaction transaction}) {
-    // Parse the amount to a double
     final double amount = double.parse(transaction.amount);
-
-    // Determine if the amount is a whole number
     final bool isWholeNumber = amount == amount.truncate();
-
-    // Format the amount based on whether it's a whole number or not
     final String formattedAmount = isWholeNumber ? '${amount.toInt()}' : amount.toStringAsFixed(2);
 
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      DateFormat('dd/MM/yyyy').format(transaction.date),
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    if (transaction.time != null) // Check if time is provided
+    return InkWell(
+      onTap: () {
+        // Intent for when the whole transaction item is tapped
+      },
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        transaction.time!,
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        DateFormat('dd/MM/yyyy').format(transaction.date),
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 4,
-                child: Text(
-                  transaction.description,
-                  style: TextStyle(color: Colors.grey[600]),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Text(
-                  'Rs.$formattedAmount', // Use formatted amount here
-                  style: TextStyle(
-                    color: transaction.transactionType == 'Given' ? Colors.red : Colors.green,
-                    fontWeight: FontWeight.bold,
+                      if (transaction.time != null)
+                        Text(
+                          transaction.time!,
+                          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        ),
+                    ],
                   ),
-                  textAlign: TextAlign.right,
                 ),
-              ),
-            ],
+                Expanded(
+                  flex: 4,
+                  child: Text(
+                    transaction.description,
+                    style: TextStyle(color: Colors.grey[600]),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Rs.$formattedAmount',
+                        style: TextStyle(
+                          color: transaction.transactionType == 'Given' ? Colors.red : Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 4.0), // Add padding to the right
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit, size: 16, color: Colors.blue),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditTransactionScreen(transaction: transaction),
+                                  ),
+                                ).then((value) {
+                                  // Optionally, refresh the transactions list upon returning to this screen
+                                  fetchTransactions(context, int.parse(customerId));
+                                });
+                              },
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(),
+                            ),
+
+                            SizedBox(width: 8), // Space between icons
+                            IconButton(
+                              icon: Icon(Icons.delete, size: 16, color: Colors.red),
+                              onPressed: () {
+                                // Show confirmation dialog
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text("Delete Transaction"),
+                                      content: Text("This action is irreversible. Are you sure you want to delete this transaction?"),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: Text("Cancel"),
+                                          onPressed: () {
+                                            Navigator.of(context).pop(); // Close the dialog
+                                          },
+                                        ),
+                                        TextButton(
+                                          child: Text("Delete"),
+                                          onPressed: () {
+                                            // Call deleteTransaction and close the dialog
+                                            deleteTransaction(context, transaction.id, customerId).then((_) {
+                                              Navigator.of(context).pop(); // Close the dialog after deletion
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(),
+                            ),
+
+
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        const Divider(
-          color: kHighLightColor, // Use your constant color here
-          height: 5, // Adjust thickness
-        ),
-      ],
+          const Divider(
+            color: kHighLightColor,
+            height: 1,
+          ),
+        ],
+      ),
     );
   }
 
+  void _editTransaction(BuildContext context, Transaction transaction) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditTransactionScreen(transaction: transaction),
+      ),
+    ).then((_) {
+      // Refresh the transaction list after editing
+      fetchTransactions(context, int.parse(customerId));
+    });
+  }
 
 
 }
+
+

@@ -246,8 +246,10 @@ class CustomerAccount {
 class SummaryData {
   final int totalCustomers;
   final String totalSum;
+  final String totalSumPaid;
+  final String totalSumReceived;
 
-  SummaryData({required this.totalCustomers, required this.totalSum});
+  SummaryData({required this.totalCustomers, required this.totalSum, required this.totalSumPaid, required this.totalSumReceived});
 }
 
 

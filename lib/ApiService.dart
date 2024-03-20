@@ -176,6 +176,8 @@ Future<SummaryData> fetchSummaryData() async {
     return SummaryData(
       totalCustomers: jsonResponse['total_customers'],
       totalSum: jsonResponse['total_sum'].toString(),
+      totalSumPaid: jsonResponse['total_sum_paid'].toString(),
+      totalSumReceived: jsonResponse['total_sum_received'].toString(),
     );
   } else {
     throw Exception('Failed to load summary data');
@@ -322,7 +324,7 @@ Future<bool> addTransaction({
     return false;
   }
 }
-Future<List<Transaction>> fetchTransactions(int customerAccountId) async {
+Future<List<Transaction>> fetchTransactions(BuildContext context, int customerAccountId) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String? authToken = prefs.getString('authToken');
   final String apiUrl = 'http://farmapp.channab.com/customers/api/transactions/$customerAccountId/';
@@ -349,3 +351,52 @@ Future<List<Transaction>> fetchTransactions(int customerAccountId) async {
     throw Exception('Failed to load transactions');
   }
 }
+
+
+
+// Example function to update a transaction
+Future<bool> updateTransaction(int transactionId, Map<String, dynamic> data) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? authToken = prefs.getString('authToken');
+  final String apiUrl = 'http://farmapp.channab.com/customers/api/transaction/$transactionId/';
+
+  Map<String, String> headers = {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Authorization': 'Token $authToken',
+  };
+
+  final response = await http.put(Uri.parse(apiUrl), headers: headers, body: json.encode(data));
+
+  if (response.statusCode == 200) {
+    // Successfully updated transaction
+    return true;
+  } else {
+    // Failed to update transaction
+    return false;
+  }
+}
+
+// Example function to delete a transaction
+Future<void> deleteTransaction(BuildContext context, int transactionId, String customerId) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? authToken = prefs.getString('authToken');
+  final String apiUrl = 'http://farmapp.channab.com/customers/api/transaction/$transactionId/';
+
+  Map<String, String> headers = {
+    'Content-Type': 'application/json; charset=UTF-8',
+    'Authorization': 'Token $authToken',
+  };
+
+  final response = await http.delete(Uri.parse(apiUrl), headers: headers);
+
+  if (response.statusCode == 204) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Transaction deleted successfully")));
+    // Optionally, refresh the transaction list after deletion
+    fetchTransactions(context, int.parse(customerId)); // Assuming fetchTransactions is adapted to take context and customerId
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to delete transaction")));
+  }
+}
+
+
+
