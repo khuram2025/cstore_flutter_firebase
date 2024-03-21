@@ -11,11 +11,27 @@ import '../widgets/ledger/header.dart';
 import '../widgets/ledger/search_box.dart';
 import '../widgets/ledger/filter_bottom_sheet.dart';
 
-class LedgerPage extends StatelessWidget {
+class LedgerPage extends StatefulWidget {
   const LedgerPage({super.key});
 
   @override
+  State<LedgerPage> createState() => _LedgerPageState();
+}
+
+class _LedgerPageState extends State<LedgerPage> {
+  final TextEditingController _searchController = TextEditingController();
+  ValueNotifier<String> _searchTermNotifier = ValueNotifier("");
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      _searchTermNotifier.value = _searchController.text;
+    });
+  }
+  @override
   Widget build(BuildContext context) {
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -42,7 +58,13 @@ class LedgerPage extends StatelessWidget {
                 const SizedBox(height: 15.0),
                 const LedgerPageHeader(),
                 const SizedBox(height: 20.0),
-                const SearchBox(),
+                SearchBox(
+                  controller: _searchController,
+                  onChange: (value) {
+                    // Handle the search logic here.
+                    // You might need to pass a callback from CustomerTab or handle it directly if SearchBox is only used there.
+                  },
+                ),
                 const SizedBox(height: 15.0),
                 const LedgerSummary(), // Add the new container here
                 const SizedBox(height: 15.0), // Optional spacing
@@ -75,19 +97,33 @@ class LedgerPage extends StatelessWidget {
                     )
                   ],
                 ),
-                const Expanded(
+                Expanded(
                   child: TabBarView(
                     children: [
-                      CustomerTab(),
+                      ValueListenableBuilder<String>(
+                        valueListenable: _searchTermNotifier,
+                        builder: (context, value, child) {
+                          return CustomerTab(searchTerm: value);
+                        },
+                      ),
                       SupplierTab(),
                     ],
                   ),
                 ),
+
+
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchTermNotifier.dispose();
+    super.dispose();
   }
 }
